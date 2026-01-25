@@ -15,7 +15,11 @@ function App() {
   const { isAuthenticated, loading } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    dispatch(loadUser());
+    // Only load user if token exists in localStorage
+    const token = localStorage.getItem('token');
+    if (token) {
+      dispatch(loadUser());
+    }
   }, [dispatch]);
 
   if (loading) {

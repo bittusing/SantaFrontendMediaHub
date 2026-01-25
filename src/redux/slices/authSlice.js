@@ -5,7 +5,7 @@ const initialState = {
   user: null,
   token: localStorage.getItem('token'),
   isAuthenticated: false,
-  loading: true,
+  loading: !!localStorage.getItem('token'), // Only show loading if token exists
   error: null
 };
 
@@ -35,8 +35,13 @@ export const login = createAsyncThunk(
 
 export const loadUser = createAsyncThunk(
   'auth/loadUser',
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
+      // Only try to load user if token exists
+      const token = localStorage.getItem('token');
+      if (!token) {
+        return rejectWithValue('No token found');
+      }
       const response = await authService.loadUser();
       return response;
     } catch (error) {

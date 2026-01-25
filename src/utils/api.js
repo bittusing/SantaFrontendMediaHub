@@ -23,9 +23,12 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only redirect on 401 if it's not the /auth/me endpoint
+    // This prevents infinite loop on page refresh
+    if (error.response?.status === 401 && !error.config.url.includes('/auth/me')) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Use React Router navigation instead of window.location
+      // This will be handled by the auth slice
     }
     return Promise.reject(error);
   }
