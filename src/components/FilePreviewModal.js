@@ -1,10 +1,16 @@
 import React from 'react';
-import { FiX, FiDownload } from 'react-icons/fi';
+import { FiX, FiDownload, FiExternalLink } from 'react-icons/fi';
 import '../styles/FilePreviewModal.scss';
 
 const FilePreviewModal = ({ file, onClose }) => {
+
   const renderPreview = () => {
-    switch (file.fileType) {
+    // Log file type for debugging
+    console.log('File type:', file.fileType, 'File:', file);
+    
+    const fileType = file.fileType?.toLowerCase();
+    
+    switch (fileType) {
       case 'image':
         return <img src={file.cloudinaryUrl} alt={file.fileName} className="preview-image" />;
       case 'video':
@@ -16,21 +22,131 @@ const FilePreviewModal = ({ file, onClose }) => {
         );
       case 'audio':
         return (
-          <audio controls className="preview-audio">
-            <source src={file.cloudinaryUrl} type={file.mimeType} />
-            Your browser does not support the audio tag.
-          </audio>
+          <div className="audio-player-container">
+            <audio controls className="preview-audio" controlsList="nodownload">
+              <source src={file.cloudinaryUrl} type={file.mimeType} />
+              <source src={file.cloudinaryUrl} type="audio/mpeg" />
+              <source src={file.cloudinaryUrl} type="audio/mp3" />
+              Your browser does not support the audio tag.
+            </audio>
+          </div>
         );
-      case 'pdf':
+      case 'pdf': {
+        // For Cloudinary PDFs uploaded as 'image' type, we can show first page as image
+        // and provide download/view options
+        const pdfUrl = file.cloudinaryUrl;
+        
+        // Generate image preview URL (first page of PDF as JPG)
+        // Cloudinary format: change extension to jpg and add pg_1 transformation
+        let previewImageUrl = pdfUrl;
+        if (pdfUrl.includes('/upload/')) {
+          previewImageUrl = pdfUrl.replace('/upload/', '/upload/pg_1,w_800/').replace('.pdf', '.jpg');
+        }
+        
         return (
-          <iframe
-            src={file.cloudinaryUrl}
-            title={file.fileName}
-            className="preview-pdf"
-          />
+          <div className="pdf-viewer">
+            <div className="pdf-preview-container">
+              <img 
+                src={previewImageUrl} 
+                alt={`${file.fileName} preview`}
+                className="pdf-preview-image"
+                style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
+                onError={(e) => {
+                  // If image preview fails, show placeholder
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div className="pdf-placeholder" style={{ display: 'none', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '300px', color: 'white' }}>
+                <FiExternalLink size={48} />
+                <p style={{ marginTop: '1rem' }}>PDF Preview</p>
+              </div>
+            </div>
+            <div className="pdf-actions">
+              <a 
+                href={pdfUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="pdf-action-button"
+              >
+                <FiExternalLink /> View PDF
+              </a>
+              <a 
+                href={pdfUrl} 
+                download={file.fileName}
+                className="pdf-action-button"
+                style={{ marginLeft: '1rem' }}
+              >
+                <FiDownload /> Download PDF
+              </a>
+            </div>
+          </div>
         );
-      default:
-        return <p>Preview not available for this file type.</p>;
+      }
+      default: {
+        // If file has cloudinaryUrl ending with .pdf, treat as PDF
+        if (file.cloudinaryUrl && file.cloudinaryUrl.toLowerCase().includes('.pdf')) {
+          const pdfUrl = file.cloudinaryUrl;
+          let previewImageUrl = pdfUrl;
+          if (pdfUrl.includes('/upload/')) {
+            previewImageUrl = pdfUrl.replace('/upload/', '/upload/pg_1,w_800/').replace('.pdf', '.jpg');
+          }
+          
+          return (
+            <div className="pdf-viewer">
+              <div className="pdf-preview-container">
+                <img 
+                  src={previewImageUrl} 
+                  alt={`${file.fileName} preview`}
+                  className="pdf-preview-image"
+                  style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+                <div className="pdf-placeholder" style={{ display: 'none', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '300px', color: 'white' }}>
+                  <FiExternalLink size={48} />
+                  <p style={{ marginTop: '1rem' }}>PDF Preview</p>
+                </div>
+              </div>
+              {/* <div className="pdf-actions">
+                <a 
+                  href={pdfUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="pdf-action-button"
+                >
+                  <FiExternalLink /> View PDF
+                </a>
+                <a 
+                  href={pdfUrl} 
+                  download={file.fileName}
+                  className="pdf-action-button"
+                  style={{ marginLeft: '1rem' }}
+                >
+                  <FiDownload /> Download PDF
+                </a>
+              </div> */}
+            </div>
+          );
+        }
+        return (
+          <div className="preview-unavailable">
+            <p>Preview not available for this file type.</p>
+            <p style={{ fontSize: '0.8rem', color: '#999' }}>Type: {file.fileType || 'unknown'}</p>
+            <a 
+              href={file.cloudinaryUrl} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="pdf-action-button"
+              style={{ marginTop: '1rem' }}
+            >
+              <FiExternalLink /> Open File
+            </a>
+          </div>
+        );
+      }
     }
   };
 

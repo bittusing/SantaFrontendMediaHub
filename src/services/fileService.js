@@ -20,8 +20,15 @@ const getFile = async (fileId) => {
 };
 
 const searchFiles = async (params) => {
-  const response = await api.get('/files/search', { params });
-  return response.data;
+  console.log('fileService.searchFiles called with params:', params);
+  try {
+    const response = await api.get('/files/search', { params });
+    console.log('fileService.searchFiles response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('fileService.searchFiles error:', error);
+    throw error;
+  }
 };
 
 const deleteFile = async (fileId) => {

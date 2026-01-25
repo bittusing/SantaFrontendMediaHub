@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { searchFiles, incrementViewCount, clearSearchResults } from '../redux/slices/fileSlice';
+import { toast } from 'react-toastify';
 import { FiSearch } from 'react-icons/fi';
 import FileCard from '../components/FileCard';
 import FilePreviewModal from '../components/FilePreviewModal';
@@ -16,11 +17,24 @@ const Search = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     if (query.trim()) {
-      dispatch(searchFiles({ query, fileType, sortBy }));
-      setHasSearched(true);
+      console.log('Search triggered with params:', { query, fileType, sortBy });
+      try {
+        const result = await dispatch(searchFiles({ query, fileType, sortBy })).unwrap();
+        console.log('Search results:', result);
+        setHasSearched(true);
+        if (result.data && result.data.length === 0) {
+          toast.info('No files found matching your search');
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        toast.error(error || 'Search failed. Please try again.');
+        setHasSearched(true);
+      }
+    } else {
+      toast.warning('Please enter a search query');
     }
   };
 
