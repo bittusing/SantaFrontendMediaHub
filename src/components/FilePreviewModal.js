@@ -32,12 +32,8 @@ const FilePreviewModal = ({ file, onClose }) => {
           </div>
         );
       case 'pdf': {
-        // For Cloudinary PDFs uploaded as 'image' type, we can show first page as image
-        // and provide download/view options
         const pdfUrl = file.cloudinaryUrl;
         
-        // Generate image preview URL (first page of PDF as JPG)
-        // Cloudinary format: change extension to jpg and add pg_1 transformation
         let previewImageUrl = pdfUrl;
         if (pdfUrl.includes('/upload/')) {
           previewImageUrl = pdfUrl.replace('/upload/', '/upload/pg_1,w_800/').replace('.pdf', '.jpg');
@@ -52,7 +48,6 @@ const FilePreviewModal = ({ file, onClose }) => {
                 className="pdf-preview-image"
                 style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
                 onError={(e) => {
-                  // If image preview fails, show placeholder
                   e.target.style.display = 'none';
                   e.target.nextSibling.style.display = 'flex';
                 }}
@@ -61,24 +56,6 @@ const FilePreviewModal = ({ file, onClose }) => {
                 <FiExternalLink size={48} />
                 <p style={{ marginTop: '1rem' }}>PDF Preview</p>
               </div>
-            </div>
-            <div className="pdf-actions">
-              <a 
-                href={pdfUrl} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="pdf-action-button"
-              >
-                <FiExternalLink /> View PDF
-              </a>
-              <a 
-                href={pdfUrl} 
-                download={file.fileName}
-                className="pdf-action-button"
-                style={{ marginLeft: '1rem' }}
-              >
-                <FiDownload /> Download PDF
-              </a>
             </div>
           </div>
         );
@@ -110,24 +87,6 @@ const FilePreviewModal = ({ file, onClose }) => {
                   <p style={{ marginTop: '1rem' }}>PDF Preview</p>
                 </div>
               </div>
-              {/* <div className="pdf-actions">
-                <a 
-                  href={pdfUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="pdf-action-button"
-                >
-                  <FiExternalLink /> View PDF
-                </a>
-                <a 
-                  href={pdfUrl} 
-                  download={file.fileName}
-                  className="pdf-action-button"
-                  style={{ marginLeft: '1rem' }}
-                >
-                  <FiDownload /> Download PDF
-                </a>
-              </div> */}
             </div>
           );
         }
