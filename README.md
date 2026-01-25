@@ -84,6 +84,17 @@ This creates an optimized production build in the `build` folder.
 - **File Management**: View, download, and delete uploaded files
 - **Responsive Design**: Mobile-friendly interface
 
+## File Upload Limits
+
+### Production (Vercel Deployment)
+- **Maximum file size**: 4MB
+- **Reason**: Vercel Hobby plan has a 4.5MB request body limit for serverless functions
+
+### Local Development
+- **Maximum file size**: 100MB
+- **Reason**: No serverless limitations on local environment
+
+
 ## Project Structure
 
 ```
