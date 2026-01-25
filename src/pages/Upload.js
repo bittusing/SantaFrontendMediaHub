@@ -22,9 +22,14 @@ const Upload = () => {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      // Validate file size (100MB)
-      if (selectedFile.size > 100 * 1024 * 1024) {
-        toast.error('File size must be less than 100MB');
+      // Check if production environment (API URL contains vercel)
+      const isProduction = process.env.REACT_APP_API_URL?.includes('vercel');
+      const maxSize = isProduction ? 4 * 1024 * 1024 : 100 * 1024 * 1024; // 4MB for production, 100MB for local
+      const maxSizeText = isProduction ? '4MB' : '100MB';
+      
+      // Validate file size
+      if (selectedFile.size > maxSize) {
+        toast.error(`File size must be less than ${maxSizeText}`);
         return;
       }
 
